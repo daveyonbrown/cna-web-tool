@@ -1,12 +1,8 @@
- CNA Web Tool
+# CNA Web Tool
 
 # Requirements
 - Python 3.11+
 - Node.js 18+ and npm
-
-# connection notes
-I have a proxy set up in vite.config.js 
-that connects the dev server, so all frontend request are set up to the Flask backend.
 
 
 # Backend Setup
@@ -43,5 +39,13 @@ python -m flask run
 cd frontend
 npm install
 npm run dev 
+```
+
+# connection notes
+I have a proxy set up in vite.config.js 
+that connects the dev server, so all frontend request are set up to the Flask backend.
+
+
+
 
 

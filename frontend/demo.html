@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CNA Merge Demo</title>
+</head>
+<body>
+  <h1>CNA Report Demo</h1>
+
+  <!-- ELC dropdown -->
+  <label>ELC:
+    <select id="elcSelect"></select>
+  </label>
+
+  <!-- County dropdown -->
+  <label>County:
+    <select id="countySelect"></select>
+  </label>
+
+  <!-- Year input -->
+  <label>Year:
+    <input type="number" id="yearInput" value="2025" min="2000">
+  </label>
+
+  <button id="loadSectionsBtn">Load Sections</button>
+
+  <h2>Sections</h2>
+  <div id="sectionsList"></div>
+
+  <h2>Upload Inserts</h2>
+  <div>
+    <input type="file" id="fileInput1" accept="application/pdf">
+    <button onclick="uploadFile(1)">Upload Insert #1</button>
+    <p id="uploadStatus1"></p>
+  </div>
+  <div>
+    <input type="file" id="fileInput2" accept="application/pdf">
+    <button onclick="uploadFile(2)">Upload Insert #2</button>
+    <p id="uploadStatus2"></p>
+  </div>
+
+  <h2>Merge</h2>
+  <button id="mergeBtn">Download</button>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:5000";
+    let uploadRef = null;
+    let uploadRef2 = null;
+    let allCounties = []; // holds full list for current ELC
+
+    // Populate ELC dropdown
+    fetch(`${API_BASE}/api/elcs`)
+      .then(res => res.json())
+      .then(data => {
+        const elcSelect = document.getElementById('elcSelect');
+        data.ELCs.forEach(elc => {
+          const opt = document.createElement('option');
+          opt.value = elc.name;
+          opt.textContent = elc.name;
+          elcSelect.appendChild(opt);
+        });
+        loadCounties(); // load counties for first ELC
+      });
+
+    // Load counties when ELC changes
+    document.getElementById('elcSelect').addEventListener('change', loadCounties);
+
+    function loadCounties() {
+      const elcName = document.getElementById('elcSelect').value;
+      fetch(`${API_BASE}/api/elcs`)
+        .then(res => res.json())
+        .then(data => {
+          const elc = data.ELCs.find(e => e.name === elcName);
+          const countySelect = document.getElementById('countySelect');
+          countySelect.innerHTML = "";
+
+          // Save full list for this ELC
+          allCounties = elc.counties.slice();
+
+          // Add "All counties" option only if multi-county
+          if (elc.type === "multi" && allCounties.length > 1) {
+            const allOpt = document.createElement('option');
+            allOpt.value = "__ALL__";
+            allOpt.textContent = "All counties";
+            countySelect.appendChild(allOpt);
+          }
+
+          // Add each county
+          elc.counties.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            countySelect.appendChild(opt);
+          });
+
+          // If multi, default to All
+          if (elc.type === "multi" && allCounties.length > 1) {
+            countySelect.value = "__ALL__";
+          }
+        });
+    }
+
+    // Load sections (if "__ALL__", preview first county just for display)
+    document.getElementById('loadSectionsBtn').addEventListener('click', () => {
+      const year = document.getElementById('yearInput').value;
+      const elc = document.getElementById('elcSelect').value;
+      let county = document.getElementById('countySelect').value;
+
+      const previewCounty = (county === "__ALL__" ? allCounties[0] : county);
+      if (!previewCounty) {
+        alert("No county available to preview.");
+        return;
+      }
+
+      fetch(`${API_BASE}/api/files?year=${year}&elc=${encodeURIComponent(elc)}&county=${encodeURIComponent(previewCounty)}`)
+        .then(res => res.json())
+        .then(data => {
+          const listDiv = document.getElementById('sectionsList');
+          listDiv.innerHTML = "";
+          (data.sections || []).forEach(sec => {
+            const wrapper = document.createElement('div');
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.value = sec.section;
+            cb.checked = !!sec.exists; 
+            cb.disabled = !sec.exists;
+
+            const label = document.createElement('label');
+            label.textContent = `${sec.section} - ${sec.label} `;
+
+            const link = document.createElement('a');
+            link.href = `${API_BASE}/api/preview?year=${year}&elc=${encodeURIComponent(elc)}&county=${encodeURIComponent(previewCounty)}&section=${sec.section}`;
+            link.target = "_blank";
+            link.textContent = "[Preview]";
+
+            wrapper.appendChild(cb);
+            wrapper.appendChild(label);
+            wrapper.appendChild(link);
+            listDiv.appendChild(wrapper);
+          });
+        });
+    });
+
+    // Upload file helper
+    function uploadFile(num) {
+      const fileInput = document.getElementById(`fileInput${num}`);
+      const file = fileInput.files[0];
+      if (!file) return alert("Select a PDF file first");
+
+      const year = document.getElementById('yearInput').value;
+      const elc = document.getElementById('elcSelect').value;
+      const countySel = document.getElementById('countySelect').value;
+      // Upload API needs a county; if "__ALL__", just send first county
+      const county = (countySel === "__ALL__" ? allCounties[0] : countySel);
+
+      const formData = new FormData();
+      formData.append('elc', elc);
+      formData.append('year', year);
+      formData.append('county', county);
+      formData.append('insert', file);
+
+      fetch(`${API_BASE}/api/upload`, {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) {
+          if (num === 1) {
+            uploadRef = data.upload_ref;
+            document.getElementById('uploadStatus1').textContent = "Upload #1 successful!";
+          } else {
+            uploadRef2 = data.upload_ref;
+            document.getElementById('uploadStatus2').textContent = "Upload #2 successful!";
+          }
+        } else {
+          alert("Upload failed: " + JSON.stringify(data));
+        }
+      });
+    }
+
+    // Merge & download
+    document.getElementById('mergeBtn').addEventListener('click', () => {
+      if (!uploadRef && !uploadRef2) return alert("Upload at least one PDF first!");
+
+      const year = document.getElementById('yearInput').value;
+      const elc = document.getElementById('elcSelect').value;
+      const countySel = document.getElementById('countySelect').value;
+
+      const sections = Array.from(document.querySelectorAll('#sectionsList input[type=checkbox]:checked'))
+                            .map(cb => cb.value);
+
+      const body = {
+        elc,
+        year,
+        sections,
+        uploadRef,
+        uploadRef2
+      };
+
+      if (countySel === "__ALL__") {
+        body.counties = allCounties.slice(); // merge all
+      } else {
+        body.county = countySel; // merge one
+      }
+
+      fetch(`${API_BASE}/api/merge`, {
+        method: 'POST',
+        headers: { "Content-Type": "application/json", "Accept": "application/pdf" },
+        body: JSON.stringify(body)
+      })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(await res.text());
+        const ct = res.headers.get('content-type') || '';
+        if (!ct.includes('application/pdf')) throw new Error(await res.text());
+        return res.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        // Name by ELC when multi, else by county
+        const countySel2 = document.getElementById('countySelect').value;
+        const namePart = (countySel2 === "__ALL__") ? document.getElementById('elcSelect').value : countySel2;
+        a.download = `${namePart}_${year}_CNA_merged.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      })
+      .catch(err => alert(`Merge failed: ${err.message}`));
+    });
+  </script>
+</body>
+</html>

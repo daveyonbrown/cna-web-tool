@@ -4,7 +4,7 @@ import { EyeOutlined, DownloadOutlined } from '@ant-design/icons'
 
 const { Title, Text } = Typography
 
-function Review({ elc, county, year, elcOptions, ALL }) {
+function Review({ elc, county, year, elcOptions,classThres, ALL }) {
     
   // finds the selected elc 
   const selectedElc = elcOptions.find(opt => opt.value === elc)
@@ -28,11 +28,12 @@ function Review({ elc, county, year, elcOptions, ALL }) {
 
   //  preview and download calls for the sections  to load 
   const buildPreviewUrl = (sectionKey, countyVal) =>
-    `/api/preview?year=${encodeURIComponent(year)}&elc=${encodeURIComponent(elc)}&county=${encodeURIComponent(countyVal)}&section=${encodeURIComponent(sectionKey)}`
+    `/api/preview?year=${encodeURIComponent(year)}&elc=${encodeURIComponent(elc)}&county=${encodeURIComponent(countyVal)}&section=${encodeURIComponent(sectionKey)}${thresholdQS}`
 
   const buildDownloadUrl = (sectionKey, countyVal) =>
-    `/api/download?year=${encodeURIComponent(year)}&elc=${encodeURIComponent(elc)}&county=${encodeURIComponent(countyVal)}&section=${encodeURIComponent(sectionKey)}`
+    `/api/download?year=${encodeURIComponent(year)}&elc=${encodeURIComponent(elc)}&county=${encodeURIComponent(countyVal)}&section=${encodeURIComponent(sectionKey)}${thresholdQS}`
 
+  const thresholdQS = classThres ? `&classThres=${encodeURIComponent(classThres)}` : '';
   // for the modal to open and populate
   const [isModalOpen, setIsModalOpen] = React.useState(false)
   const [modalCounty, setModalCounty] = React.useState(null)   
@@ -72,7 +73,9 @@ function Review({ elc, county, year, elcOptions, ALL }) {
                     <div style={{ marginTop: 8, fontSize: 12, opacity: 0.75 }}>
                       ELC: {selectedElc?.label || '—'} <br />
                       County: {c.label} <br />
-                      Year: {year}
+                      Class Score: {classThres}<br />
+                      Year: {year} 
+                      
                     </div>
                   </div>
 

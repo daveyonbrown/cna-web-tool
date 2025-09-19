@@ -83,3 +83,18 @@ def cleanup_uploads():
                         os.remove(path)
                 except OSError:
                     continue
+
+
+def c_section(section: str, classThres) -> str:
+    if classThres in ('5','5.0',5, 5.0):
+        thres =5.0
+    else:
+        thres = 4.5
+    
+    if section == 'C':
+        if thres == 5.0:
+            return 'C_5'
+        else:
+            return 'C_45'
+    return section
+    

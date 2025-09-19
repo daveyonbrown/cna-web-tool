@@ -1,5 +1,6 @@
 import React from 'react'
-import { Row, Col, Space, Typography, Select, Card, Checkbox, Alert} from 'antd'
+import { Row, Col, Space, Typography, Select, Card, Checkbox, Alert,Tooltip, Button}from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
 
 const { Text, Title } = Typography
 
@@ -8,7 +9,7 @@ const { Text, Title } = Typography
 
 function Selector({ elc, setElc,county, setCounty,year,
     setYear,confirmElc,setConfirmElc,elcOptions,
-    allCountiesVal,}){
+    allCountiesVal,setClassThres,classThres}){
 
     // finds the elc that matches the selected one from value 
     const selectedElc = elcOptions.find(option => option.value === elc)
@@ -51,6 +52,11 @@ function Selector({ elc, setElc,county, setCounty,year,
     const yearOptions = React.useMemo(() => {
        return [{value: thisYear, label: String(thisYear)}];
     }, [thisYear]);
+
+    const classOptions = React.useMemo(() => ([
+        { value: 4.5, label: ' 4.5 and above' },
+        { value: 5, label: '5.0 and above' } ]), []);
+
 
 
     return(
@@ -108,6 +114,29 @@ function Selector({ elc, setElc,county, setCounty,year,
                             value={year}
                             onChange={setYear}
                         />
+                        </Space>
+                    </Col>
+                    
+
+                     {/* Class Score */}
+                    <Col xs={24} md={8}>
+                        <Space direction="vertical" style={{ width: '100%' }}>
+                            <Text strong>CLASS Score</Text>
+                            <div className='HelpButton'>
+                                <Select
+                                    placeholder="Select Class Threshold"
+                                    style={{ width: '100%' }}
+                                    options={classOptions}
+                                    value={classThres}
+                                    onChange={setClassThres}
+                                />
+                                <Tooltip
+                                placement='bottom'
+                                title='At the discretion of Early Learning Coalitions, Community Needs Assessment Section C can include results on SR and VPK providers who either have a CLASS Score of 4.5 and above or 5 and above (related to the provider quality performance incentive). This threshold can chosen based on the focus and priorities of the ELC, but by default, a CLASS threshold of 4.5 will be used for reporting purposes unless a CLASS Threshold of 5 is preferred.'
+                                >
+                                <QuestionCircleOutlined className='HelpIcon' />
+                                </Tooltip>
+                            </div>      
                         </Space>
                     </Col>
                     </Row>

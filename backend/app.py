@@ -78,8 +78,10 @@ def get_preview():
     elc = request.args['elc']
     county = request.args['county']
     section = request.args['section']
+    classThres =request.args.get('classThres')
 
-    path = config.build_path(year,elc,county,section)
+    all_section = config.c_section(section,classThres)
+    path = config.build_path(year,elc,county,all_section)
     print("Attempting preview path:", path)
     if not os.path.exists(path):
         return jsonify({'message':'preivew is does not exist'})
@@ -94,9 +96,11 @@ def download():
     elc = request.args['elc']
     county = request.args['county']
     section = request.args['section']
+    classThres =request.args.get('classThres')
     
 
-    path = config.build_path(year,elc,county,section)
+    all_section = config.c_section(section,classThres)
+    path = config.build_path(year,elc,county,all_section)
     print("Attempting preview path:", path)
     if not os.path.exists(path):
         return jsonify({'message':' file does not exist'})
@@ -175,6 +179,7 @@ def merge():
     year = data.get('year')
     county = data.get('county')
     sections = data.get('sections') or []
+    classThres = data.get('classThres')
     upload_ref = data.get('uploadRef')
     upload_ref2 = data.get('uploadRef2')
     counties = data.get('counties')
@@ -213,7 +218,8 @@ def merge():
     #starts the merge process and adds in the base files into the merger 
     for cty in selected_counties:
         for section in sections:
-            section_path = config.build_path(year,elc,cty, section)
+            all_section = config.c_section(section,classThres)
+            section_path = config.build_path(year,elc,cty, all_section)
             if not os.path.exists(section_path):
                 return jsonify({'error': 'no pdfs found for section'})
             merge_files.append(section_path)

@@ -117,3 +117,14 @@
   left: 32px; 
            
 }
+
+.HelpButton {
+display: flex;
+gap: 8px;
+width: 100%;
+}
+
+.HelpIcon {
+  font-size:large;
+  cursor: pointer;
+}

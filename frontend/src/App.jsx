@@ -7,6 +7,7 @@ import Start from './components/Start'
 import Selector from './components/Selector'
 import Review from './components/Review'
 import Report from './components/Report'
+import Complete from './components/Complete';
 
 
 const { Header, Footer, Content } = Layout
@@ -51,7 +52,7 @@ function App() {
   const [helpOpen, setHelpOpen] = React.useState(false);
 
   //used for buttons to proceed through the steps
-  const next = () => setCurrent((curr) => Math.min(curr + 1, 3));
+  const next = () => setCurrent((curr) => Math.min(curr + 1, 4));
   const prev = () => setCurrent((curr) => Math.max(curr- 1, 0));
 
   //titles for the progress bar
@@ -60,12 +61,23 @@ function App() {
     {title: 'Select ELC'},
     {title: 'Review Documents'},
     {title: 'Submit Report'},
+    {title: 'Complete'}
   ]
 
   //this makes it so the user cannot go on until ELC is selected
   const goNextBut = current !== 1 ? true : Boolean(elc && confirmElc);
-  
 
+  const goComplete = () => setCurrent(4);
+  
+  const restart = () => {
+    setElc(undefined);
+    setCounty(undefined);
+    setYear(thisYear);
+    setConfirmElc(false);
+    setCurrent(0);
+  };
+
+  const [classThres, setClassThres] = React.useState(4.5);
 
   return (
     <div className='App'>
@@ -97,6 +109,8 @@ function App() {
                 allCountiesVal={allCountiesVal}
                 confirmElc={confirmElc}
                 setConfirmElc={setConfirmElc}
+                classThres={classThres}
+                setClassThres={setClassThres}
               />
             )}
 
@@ -112,6 +126,7 @@ function App() {
                 year = {year}
                 elcOptions = {elcOptions}
                 ALL = {allCountiesVal}
+                classThres= {classThres}
               /> 
             )}
 
@@ -123,9 +138,22 @@ function App() {
                 year = {year}
                 elcOptions = {elcOptions}
                 ALL = {allCountiesVal}
+                classThres = {classThres}
+                onComplete={goComplete}
               /> 
             )}
           
+            {/* step 5 complete */}
+            {current == 4 && (
+              <Complete
+              onNext={restart}
+              elc = {elc}
+                county = {county}
+                year = {year}
+                elcOptions = {elcOptions}
+                ALL = {allCountiesVal}
+              /> 
+            )}
           
         </div>
       </div>
@@ -135,8 +163,8 @@ function App() {
               <Button icon={<InfoCircleOutlined />} onClick={() => setHelpOpen(true)}>
                 Instructions
               </Button>
-              {current > 0 && <Button onClick={prev}>Back</Button>}
-              {current> 0 && current < items.length - 1 && (
+              {current > 0 && current < 4 && <Button onClick={prev}>Back</Button>}
+              {current> 0 && current < items.length - 1 && current !==3 &&(
                 <Button type='primary' onClick={next} disabled={!goNextBut}>
                 Next
                 </Button>

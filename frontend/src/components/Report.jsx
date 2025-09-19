@@ -8,7 +8,7 @@ const { Title } = Typography
 
 
 
-function Report({ elc, county, year, elcOptions, ALL }) {
+function Report({ elc, county, year, elcOptions, ALL, onComplete }) {
   const [uploadRefD, setUploadRefD] = React.useState(null)
   const [uploadRefE, setUploadRefE] = React.useState(null)
 
@@ -76,6 +76,8 @@ function Report({ elc, county, year, elcOptions, ALL }) {
       a.download = `${elc}_${year}_CNA_Report.pdf`;
       a.click();
       window.URL.revokeObjectURL(url);
+      onComplete?.();
+
       
     } catch (err) {
       console.error(err);
@@ -87,7 +89,14 @@ function Report({ elc, county, year, elcOptions, ALL }) {
   return (
     <div className="StepBody">
       <div className="StepContent">
+        <div style={{ marginTop: 16 }}>
+          {/* pseudo button for Segment E template */}
+          <Button icon={<FileDoneOutlined />} href="#" target="_blank">
+            Download Segment E Template
+          </Button>
+        </div>
 
+        
       {/* segment D Card  */}
         <Row gutter={[16, 16]}>
           <Col xs={24} md={12}>
@@ -123,12 +132,7 @@ function Report({ elc, county, year, elcOptions, ALL }) {
           </Button>
         </div>
 
-        <div style={{ marginTop: 16 }}>
-          {/* pseudo button for Segment E template */}
-          <Button icon={<FileDoneOutlined />} href="#" target="_blank">
-            Download Segment E Template
-          </Button>
-        </div>
+        
       </div>
     </div>
   )

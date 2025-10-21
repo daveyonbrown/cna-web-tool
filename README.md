@@ -1,6 +1,27 @@
 # CNA Web Tool
 
-# Requirements
+# Run with Docker
+``` bash
+# 1) clone the repo 
+git clone repo
+
+# 2) cd into repo root
+cd cna-tool
+
+# 3) pull and start the containers
+docker compose -f docker-compose-dev.yml pull
+docker compose -f docker-compose-dev.yml up -d
+
+```
+# Docker Hub Repo Links
+- Backend: https://hub.docker.com/r/daveyonbrown/cna-backend
+- Frontend: https://hub.docker.com/r/daveyonbrown/cna-frontend
+
+
+
+
+# Non Docker method
+Requirements: 
 - Python 3.11+
 - Node.js 18+ and npm
 

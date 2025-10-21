@@ -1,0 +1,28 @@
+services:
+  backend:
+    build: 
+      context: ./backend
+    image: daveyonbrown/cna-backend:${IMAGE_TAG}
+    container_name: cna-backend
+    ports:
+      - "5001:5000"
+   
+    volumes:
+      - ./backend/private_files:/app/private_files:ro
+      - ./backend/temp:/app/temp
+
+  
+  frontend:
+    build: 
+      context: ./frontend
+      args:
+        VITE_API_URL: http://backend:5000
+    
+    image: daveyonbrown/cna-frontend:${IMAGE_TAG}
+    container_name: cna-frontend
+    ports:
+      - "3000:3000"
+    environment:
+    - VITE_API_URL=http://backend:5000
+    depends_on:
+      - backend

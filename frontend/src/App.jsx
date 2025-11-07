@@ -82,7 +82,7 @@ function App() {
   return (
     <div className='App'>
     <Layout className='LayoutFull' >
-      <Header className='HeaderStyle' >Community Needs Assessment</Header>
+      {/* <Header className='HeaderStyle' >Community Needs Assessment</Header> */}
       
       <Content className='ContentStyle' >
       <div className='StepsWrap'>

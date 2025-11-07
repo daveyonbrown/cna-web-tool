@@ -128,16 +128,20 @@ def upload():
     
 
     #checks to see if the file size is too big
-    if config.MAX_UPLOAD_MB:
-        file.seek(0, os.SEEK_END)
-        size_bytes = file.tell()
-        file.seek(0)
-        if size_bytes > config.MAX_UPLOAD_MB * 1024 *1024:
-            return jsonify({'error': 'File too large'})
-    else:
-        file.seek(0, os.SEEK_END)
-        size_bytes = file.tell()
-        file.seek(0)
+   
+    file.seek(0, os.SEEK_END)
+    size_bytes = file.tell()
+    file.seek(0)
+
+    if config.MAX_UPLOAD_MB and size_bytes > config.MAX_UPLOAD_MB * 1024 *1024:
+        return jsonify({'error': 'File too large'})
+        
+    head = file.stream.read(5)
+    file.stream.seek(0)
+    if head != config.PDF_MAGIC:
+        if file.mimetype not in config.ALLOWED_TYPES:
+            return jsonify({'error': 'Only PDF files are allowed'})
+
 
     #sets the new upload name with a uuid and where to upload in its path
     upload_name = config.new_upload_name()

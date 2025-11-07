@@ -11,14 +11,15 @@ TEMP_ROOT = os.path.join(BASE_DIR,"temp")
 
 
 TEMP_UPLOADS = os.path.join(TEMP_ROOT, 'uploads')
-ALLOWED_TYPES =["application/pdf"]
+ALLOWED_TYPES = {"application/pdf", "application/x-pdf", "application/acrobat", "applications/vnd.pdf", "text/pdf", "application/octet-stream"}
+PDF_MAGIC = b"%PDF-"
 os.makedirs(TEMP_UPLOADS, exist_ok=True)
 
 
 
 ALLOWED_YEARS = [2025] # will add more years as they progress
 MAX_UPLOAD_MB = 25
-TEMP_UPLOAD_TIME = 10 # 5 minutes 
+TEMP_UPLOAD_TIME = 300 # 5 minutes 
 
 
 # identififaction used when called by api/ frontend
@@ -97,4 +98,5 @@ def c_section(section: str, classThres) -> str:
         else:
             return 'C_45'
     return section
+    
     

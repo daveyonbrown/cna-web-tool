@@ -11,22 +11,42 @@ const { Title } = Typography
 function Report({ elc, county, year, elcOptions, ALL, onComplete }) {
   const [uploadRefD, setUploadRefD] = React.useState(null)
   const [uploadRefE, setUploadRefE] = React.useState(null)
+  const [draggerKeyD, setDraggerKeyD] = React.useState(0)
+  const [draggerKeyE, setDraggerKeyE] = React.useState(0)
+
+  React.useEffect(() => {
+    setUploadRefD(null),
+    setUploadRefE(null),
+    setDraggerKeyD(k => k+1),
+    setDraggerKeyD(k => k+1)
+  }, [elc,county,year])
 
   // for the dragger box and sets up the configs for it for upload
   const makeProps = (section, setRef) => ({
+    key: section,
     name: 'insert',
     action: `/api/upload`,
     data: { elc, year, county },
-    accept: 'application/pdf',
+    accept: '.pdf',
     maxCount: 1,
     onChange(info) {
       if (info.file.status === 'done') {
         const ref = info.file.response?.upload_ref
-        setRef(ref)
-        message.success(`${section} uploaded`)
+        if (ref){
+          setRef(ref)
+          message.success(`${section} uploaded`)
+        }else {
+          message.error(`${section} upload failed: missing reference`)
+        }
+        
       } else if (info.file.status === 'error') {
-        message.error(`${section} upload failed`)
+        const resp = info.file?.response
+        const msg = (resp && (resp.error || resp.message)) || `${section} upload failed`
+        message.error(msg)
       }
+    },
+    onRemove() {
+      setRef(null)
     },
   })
 
@@ -76,6 +96,10 @@ function Report({ elc, county, year, elcOptions, ALL, onComplete }) {
       a.download = `${elc}_${year}_CNA_Report.pdf`;
       a.click();
       window.URL.revokeObjectURL(url);
+      setUploadRefD(null)
+      setUploadRefE(null)
+      setDraggerKeyD(k => k + 1) 
+      setDraggerKeyE(k => k + 1)
       onComplete?.();
 
       

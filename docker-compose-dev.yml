@@ -3,6 +3,7 @@ services:
     build: 
       context: ./backend
     image: daveyonbrown/cna-backend:${IMAGE_TAG}
+    platform: linux/amd64
     container_name: cna-backend
     ports:
       - "5001:5000"
@@ -19,6 +20,7 @@ services:
         VITE_API_URL: http://backend:5000
     
     image: daveyonbrown/cna-frontend:${IMAGE_TAG}
+    platform: linux/amd64
     container_name: cna-frontend
     ports:
       - "3000:3000"
